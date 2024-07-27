@@ -1,0 +1,11 @@
+The binary equivalent of 1    is 0000000000000001
+The binary equivalent of 3    is 0000000000000011
+The binary equivalent of 7    is 0000000000000111
+The binary equivalent of 15   is 0000000000001111
+The binary equivalent of 31   is 0000000000011111
+The binary equivalent of 63   is 0000000000111111
+The binary equivalent of 127  is 0000000001111111
+The binary equivalent of 255  is 0000000011111111
+The binary equivalent of 511  is 0000000111111111
+The binary equivalent of 1023 is 0000001111111111
+The binary equivalent of 2047 is 0000011111111111
