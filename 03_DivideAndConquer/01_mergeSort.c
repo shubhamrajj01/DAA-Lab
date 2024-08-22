@@ -1,63 +1,50 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <time.h>
 
 #define MAX_ELEMENTS 500
-#define IN_ASCE "inAsce.dat"
-#define OUT_MERGE_ASCE "outMergeAsce.dat"
-#define IN_DESC "inDesc.dat"
-#define OUT_MERGE_DESC "outMergeDesc.dat"
-#define IN_RAND "inRand.dat"
-#define OUT_MERGE_RAND "outMergeRand.dat"
-#define REPEAT_TIMES 1000  // Number of repetitions
 
 int comparison_count = 0;
+int worst_case_flag = 0;
 
-void merge(int arr[], int left, int mid, int right) {
-    int n1 = mid - left + 1;
-    int n2 = right - mid;
-    int L[n1], R[n2];
-
-    for (int i = 0; i < n1; i++)
-        L[i] = arr[left + i];
-    for (int j = 0; j < n2; j++)
-        R[j] = arr[mid + 1 + j];
-
-    int i = 0, j = 0, k = left;
-    while (i < n1 && j < n2) {
-        comparison_count++;
-        if (L[i] <= R[j]) {
-            arr[k++] = L[i++];
-        } else {
-            arr[k++] = R[j++];
-        }
-    }
-
-    while (i < n1) {
-        arr[k++] = L[i++];
-    }
-
-    while (j < n2) {
-        arr[k++] = R[j++];
-    }
+void swap(int* a, int* b) {
+    int temp = *a;
+    *a = *b;
+    *b = temp;
 }
 
-void mergeSort(int arr[], int left, int right) {
-    if (left < right) {
-        int mid = left + (right - left) / 2;
+int partition(int arr[], int low, int high) {
+    int pivot = arr[high];
+    int i = (low - 1);
+    for (int j = low; j < high; j++) {
+        comparison_count++;
+        if (arr[j] <= pivot) {
+            i++;
+            swap(&arr[i], &arr[j]);
+        }
+    }
+    swap(&arr[i + 1], &arr[high]);
 
-        mergeSort(arr, left, mid);
-        mergeSort(arr, mid + 1, right);
+    // Check if partition is worst-case
+    if (i == low - 1 || i == high - 1) {
+        worst_case_flag = 1;
+    }
 
-        merge(arr, left, mid, right);
+    return (i + 1);
+}
+
+void quickSort(int arr[], int low, int high) {
+    if (low < high) {
+        int pi = partition(arr, low, high);
+        quickSort(arr, low, pi - 1); 
+        quickSort(arr, pi + 1, high);
     }
 }
 
 void readFile(const char *filename, int arr[], int *size) {
     FILE *file = fopen(filename, "r");
     if (!file) {
-        perror("Error opening file");
+        fprintf(stderr, "Error opening file %s\n", filename);
         exit(EXIT_FAILURE);
     }
 
@@ -72,7 +59,7 @@ void readFile(const char *filename, int arr[], int *size) {
 void writeFile(const char *filename, int arr[], int size) {
     FILE *file = fopen(filename, "w");
     if (!file) {
-        perror("Error opening file");
+        fprintf(stderr, "Error opening file %s\n", filename);
         exit(EXIT_FAILURE);
     }
 
@@ -83,7 +70,7 @@ void writeFile(const char *filename, int arr[], int size) {
     fclose(file);
 }
 
-void printArray(const int arr[], int size) {
+void printArray(int arr[], int size) {
     for (int i = 0; i < size; i++) {
         printf("%d ", arr[i]);
     }
@@ -94,9 +81,9 @@ int main() {
     int option;
     int arr[MAX_ELEMENTS];
     int size;
-    const char *inputFile = NULL, *outputFile = NULL;
+    const char *inputFile, *outputFile;
 
-    printf("MAIN MENU (MERGE SORT)\n");
+    printf("MAIN MENU (QUICK SORT)\n");
     printf("1. Ascending Data\n");
     printf("2. Descending Data\n");
     printf("3. Random Data\n");
@@ -106,16 +93,16 @@ int main() {
 
     switch (option) {
         case 1:
-            inputFile = IN_ASCE;
-            outputFile = OUT_MERGE_ASCE;
+            inputFile = "inAsce.dat";
+            outputFile = "outQuickAsce.dat";
             break;
         case 2:
-            inputFile = IN_DESC;
-            outputFile = OUT_MERGE_DESC;
+            inputFile = "inDesc.dat";
+            outputFile = "outQuickDesc.dat";
             break;
         case 3:
-            inputFile = IN_RAND;
-            outputFile = OUT_MERGE_RAND;
+            inputFile = "inRand.dat";
+            outputFile = "outQuickRand.dat";
             break;
         case 4:
             return 0;
@@ -129,25 +116,45 @@ int main() {
     printArray(arr, size);
 
     comparison_count = 0;
+    worst_case_flag = 0;
+
     struct timespec start, end;
     clock_gettime(CLOCK_MONOTONIC, &start);
 
-    for (int i = 0; i < REPEAT_TIMES; i++) {
-        // You may need to reset the array to its original state before each sort
-        // If sorting in place and you want to repeat, consider creating a copy of the original array
-        mergeSort(arr, 0, size - 1);
-    }
+    quickSort(arr, 0, size - 1);
 
     clock_gettime(CLOCK_MONOTONIC, &end);
     long execution_time = (end.tv_sec - start.tv_sec) * 1000000000L + (end.tv_nsec - start.tv_nsec);
-    execution_time /= REPEAT_TIMES; // Average execution time
 
     writeFile(outputFile, arr, size);
 
     printf("After Sorting: ");
     printArray(arr, size);
     printf("Number of Comparisons: %d\n", comparison_count);
-    printf("Execution Time: %ld nanoseconds (average over %d repetitions)\n", execution_time, REPEAT_TIMES);
+    printf("Execution Time: %ld nanoseconds\n", execution_time);
+    printf("Scenario: %s-case\n", worst_case_flag ? "Worst" : "Best");
 
     return 0;
 }
+
+/*3.1 Aim of the program: Write a menu driven program to sort list of array elements using Merge Sort technique and calculate the execution time only to sort the elements.  Count the number of comparisons. 
+Note# 
+●To calculate execution time, assume that single program is under execution in the CPU. 
+●Number of elements in each input file should vary from 300 to 500 entries. 
+●For ascending order: Read data from a file “inAsce.dat” having content 10 20 30 40….., Store the result in “outMergeAsce.dat”.
+●For descending order: Read data from a file “inDesc.dat” having content 90 80 70 60…., Store the result in “outMergeDesc.dat”.
+●For random data: Read data from a file “inRand.dat” having content 55 66 33 11 44 …, Store the result in “outMergeRand.dat”
+
+Sample Input from file:
+MAIN MENU (MERGE SORT)
+1. Ascending Data
+2. Descending Data
+3. Random Data
+4. ERROR (EXIT)
+
+Output:
+Enter option: 1
+Before Sorting: Content of the input file
+After Sorting: Content of the output file
+Number of Comparisons: Actual
+Execution Time: lapse time in nanosecond*/

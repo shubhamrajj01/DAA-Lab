@@ -2,10 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <windows.h>
 
 #define MAX_ELEMENTS 500
 
 int comparison_count = 0;
+int worst_case_flag = 0;
 
 void swap(int* a, int* b) {
     int temp = *a;
@@ -13,10 +15,9 @@ void swap(int* a, int* b) {
     *b = temp;
 }
 
- int partition(int arr[], int low, int high) {
+int partition(int arr[], int low, int high) {
     int pivot = arr[high];
     int i = (low - 1);
-
     for (int j = low; j < high; j++) {
         comparison_count++;
         if (arr[j] <= pivot) {
@@ -26,15 +27,19 @@ void swap(int* a, int* b) {
     }
     swap(&arr[i + 1], &arr[high]);
 
-    return (i + 1);
-}  
+    // Check if partition is worst-case
+    if (i == low - 1 || i == high - 1) {
+        worst_case_flag = 1;
+    }
 
+    return (i + 1);
+}
 
 void quickSort(int arr[], int low, int high) {
     if (low < high) {
         int pi = partition(arr, low, high);
-        quickSort(arr, low, pi - 1);  
-        quickSort(arr, pi + 1, high); 
+        quickSort(arr, low, pi - 1); // Corrected partition range
+        quickSort(arr, pi + 1, high);
     }
 }
 
@@ -67,14 +72,12 @@ void writeFile(const char *filename, int arr[], int size) {
     fclose(file);
 }
 
-
 void printArray(int arr[], int size) {
     for (int i = 0; i < size; i++) {
         printf("%d ", arr[i]);
     }
     printf("\n");
 }
-
 
 int main() {
     int option;
@@ -115,6 +118,7 @@ int main() {
     printArray(arr, size);
 
     comparison_count = 0;
+    worst_case_flag = 0;
 
     struct timespec start, end;
     clock_gettime(CLOCK_MONOTONIC, &start);
@@ -130,7 +134,28 @@ int main() {
     printArray(arr, size);
     printf("Number of Comparisons: %d\n", comparison_count);
     printf("Execution Time: %ld nanoseconds\n", execution_time);
+    printf("Scenario: %s-case\n", worst_case_flag ? "Worst" : "Best");
 
     return 0;
 }
 
+/*3.2 Aim of the program: Write a menu driven program to sort a list of elements in ascending order using Quick Sort technique. Each choice for the input data has its own disc file.  A separate output file can be used for sorted elements. After sorting display the content of the output file along with number of comparisons. Based on the partitioning position for each recursive call, conclude the input scenario is either best-case partitioning or worst-case partitioning. 
+Note# 
+●The worst-case behavior for quicksort occurs when the partitioning routine produces one subproblem with n-1 elements and one with 0 elements. The best-case behaviour occurred in most even possible split, PARTITION produces two subproblems, each of size no more than n/2.
+●Number of elements in each input file should vary from 300 to 500 entries. 
+●For ascending order: Read data from a file “inAsce.dat” having content 10 20 30 40….., Store the result in “outQuickAsce.dat”.
+●For descending order: Read data from a file “inDesc.dat” having content 90 80 70 60…., Store the result in “outQuickDesc.dat”.
+●For random data: Read data from a file “inRand.dat” having content 55 66 33 11 44 …, Store the result in “outQuickRand.dat”
+Sample Input from file:
+MAIN MENU (QUICK SORT)
+1. Ascending Data
+2. Descending Data
+3. Random Data
+4. ERROR (EXIT)
+
+Output:
+Enter option: 1
+Before Sorting: Content of the input file
+After Sorting: Content of the output file
+Number of Comparisons: Actual
+Scenario: Best or Worst-case*/
