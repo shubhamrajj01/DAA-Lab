@@ -1,0 +1,8 @@
+7
+0 Adarsh_Hota 20 70 154
+1 Riya_Sharma 22 65 132
+2 Vikram_Singh 19 68 143
+3 Neha_Verma 21 64 121
+4 Ankit_Mehra 23 72 176
+5 Priya_Mishra 20 66 138
+6 Rohit_Singhania 22 69 150
